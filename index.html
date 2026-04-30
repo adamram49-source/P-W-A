@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>האפליקציה שלי</title>
+
+    <!-- יצירת מניפסט דינמי בקובץ אחד -->
+    <script>
+        const manifest = {
+            "name": "My All In One App",
+            "short_name": "MyPWA",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#4A90E2",
+            "icons": [{
+                "src": "https://cdn-icons-png.flaticon.com/512/2583/2583158.png",
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "any maskable"
+            }]
+        };
+        const stringManifest = JSON.stringify(manifest);
+        const blob = new Blob([stringManifest], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blob);
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestURL;
+        document.head.appendChild(link);
+    </script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            transition: background 0.3s;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+        }
+
+        h1 { color: #1a73e8; margin-bottom: 10px; }
+        p { color: #5f6368; line-height: 1.5; }
+
+        #install-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: none; /* מוסתר עד שהדפדפן מוכן */
+            margin-top: 20px;
+            width: 100%;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(26, 115, 232, 0.3);
+        }
+
+        #install-btn:hover { background-color: #1557b0; }
+
+        /* עיצוב שונה כשהאפליקציה מותקנת */
+        @media (display-mode: standalone) {
+            body { background-color: #e8f0fe; }
+            .install-ui { display: none !important; }
+            .app-ui { display: block !important; }
+        }
+
+        .app-ui { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <!-- ממשק שרואים באתר -->
+        <div class="install-ui">
+            <h1>התקנת אפליקציה</h1>
+            <p>לחץ על הכפתור למטה כדי להוסיף את האתר למסך הבית שלך כאפליקציה לכל דבר.</p>
+            <button id="install-btn">התקן עכשיו 📱</button>
+        </div>
+
+        <!-- ממשק שרואים רק בתוך האפליקציה המותקנת -->
+        <div class="app-ui">
+            <h1>ברוכים הבאים לאפליקציה!</h1>
+            <p>אתה גולש כעת מהגרסה המותקנת. העדכונים יורדו אוטומטית בכל פעם שתפתח אותי.</p>
+            <div style="font-size: 50px;">🚀</div>
+        </div>
+    </div>
+
+    <script>
+        // 1. יצירת Service Worker בתוך קובץ ה-HTML (עדכון שקט)
+        const swCode = `
+            const CACHE_NAME = 'pwa-v1';
+            self.addEventListener('install', (e) => {
+                e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['/'])));
+                self.skipWaiting();
+            });
+            self.addEventListener('activate', (e) => {
+                e.waitUntil(caches.keys().then(keys => Promise.all(
+                    keys.map(k => k !== CACHE_NAME && caches.delete(k))
+                )));
+            });
+            self.addEventListener('fetch', (e) => {
+                e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+            });
+        `;
+
+        const swBlob = new Blob([swCode], {type: 'application/javascript'});
+        const swURL = URL.createObjectURL(swBlob);
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(swURL).then(() => console.log("SW Registered"));
+        }
+
+        // 2. לוגיקת כפתור ההתקנה
+        let deferredPrompt;
+        const btn = document.getElementById('install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            btn.style.display = 'block'; // מציג את הכפתור רק כשהדפדפן מאשר שהאתר מוכן ל-PWA
+        });
+
+        btn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    btn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // בדיקה אם כבר מותקן
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log("Running as PWA");
+        }
+    </script>
+</body>
+</html>
