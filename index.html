@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>האפליקציה שלי</title>
+    <title>האפליקציה המעודכנת שלי</title>
 
-    <!-- יצירת מניפסט דינמי בקובץ אחד -->
     <script>
+        // מניפסט מעודכן - שינינו צבע נושא
         const manifest = {
-            "name": "My All In One App",
-            "short_name": "MyPWA",
+            "name": "Pro App V2",
+            "short_name": "V2 App",
             "start_url": ".",
             "display": "standalone",
-            "background_color": "#ffffff",
-            "theme_color": "#4A90E2",
+            "background_color": "#121212",
+            "theme_color": "#ff9800",
             "icons": [{
                 "src": "https://cdn-icons-png.flaticon.com/512/2583/2583158.png",
                 "sizes": "512x512",
@@ -31,80 +31,97 @@
     </script>
 
     <style>
+        /* שינוי עיצוב משמעותי - Dark Mode */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            transition: background 0.3s;
+            overflow: hidden;
         }
 
-        .card {
-            background: white;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        .container {
             text-align: center;
-            max-width: 90%;
-            width: 400px;
+            border: 2px solid #ff9800;
+            padding: 40px;
+            border-radius: 30px;
+            background: #1e1e1e;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.2);
         }
 
-        h1 { color: #1a73e8; margin-bottom: 10px; }
-        p { color: #5f6368; line-height: 1.5; }
+        h1 { color: #ff9800; font-size: 3rem; margin: 0; }
+        .version-badge {
+            background: #ff9800;
+            color: black;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
 
-        #install-btn {
-            background-color: #1a73e8;
+        /* אלמנט ויזואלי חדש - מד מהירות */
+        .gauge {
+            width: 150px;
+            height: 150px;
+            border: 10px solid #333;
+            border-top: 10px solid #ff9800;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff9800, #f44336);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 18px;
+            padding: 15px 40px;
+            font-size: 20px;
             border-radius: 50px;
             cursor: pointer;
-            display: none; /* מוסתר עד שהדפדפן מוכן */
-            margin-top: 20px;
-            width: 100%;
+            display: none;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(26, 115, 232, 0.3);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
         }
 
-        #install-btn:hover { background-color: #1557b0; }
-
-        /* עיצוב שונה כשהאפליקציה מותקנת */
         @media (display-mode: standalone) {
-            body { background-color: #e8f0fe; }
-            .install-ui { display: none !important; }
-            .app-ui { display: block !important; }
+            .web-only { display: none !important; }
+            body { border: 10px solid #ff9800; box-sizing: border-box; }
         }
-
-        .app-ui { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <!-- ממשק שרואים באתר -->
-        <div class="install-ui">
-            <h1>התקנת אפליקציה</h1>
-            <p>לחץ על הכפתור למטה כדי להוסיף את האתר למסך הבית שלך כאפליקציה לכל דבר.</p>
-            <button id="install-btn">התקן עכשיו 📱</button>
+    <div class="container">
+        <div class="version-badge">גרסה 2.0 - עודכן!</div>
+        <h1>PRO APP</h1>
+        
+        <div class="web-only">
+            <p>האם ראית את השינוי? האתר הפך לכהה!</p>
+            <button id="install-btn">התקן גרסה 2 🚀</button>
         </div>
 
-        <!-- ממשק שרואים רק בתוך האפליקציה המותקנת -->
-        <div class="app-ui">
-            <h1>ברוכים הבאים לאפליקציה!</h1>
-            <p>אתה גולש כעת מהגרסה המותקנת. העדכונים יורדו אוטומטית בכל פעם שתפתח אותי.</p>
-            <div style="font-size: 50px;">🚀</div>
+        <div class="app-only" style="display: none;">
+            <p>ברוכים הבאים לממשק האפליקציה החדש!</p>
+            <div class="gauge"></div>
+            <p>הכל פועל כשורה ובצורה מאובטחת.</p>
         </div>
     </div>
 
     <script>
-        // 1. יצירת Service Worker בתוך קובץ ה-HTML (עדכון שקט)
+        // שינוי ה-CACHE_NAME ל-v2 גורם לעדכון להיכנס לתוקף
         const swCode = `
-            const CACHE_NAME = 'pwa-v1';
+            const CACHE_NAME = 'pwa-v2'; 
             self.addEventListener('install', (e) => {
                 e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['/'])));
                 self.skipWaiting();
@@ -123,33 +140,30 @@
         const swURL = URL.createObjectURL(swBlob);
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(swURL).then(() => console.log("SW Registered"));
+            navigator.serviceWorker.register(swURL);
         }
 
-        // 2. לוגיקת כפתור ההתקנה
+        // לוגיקת התקנה
         let deferredPrompt;
         const btn = document.getElementById('install-btn');
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            btn.style.display = 'block'; // מציג את הכפתור רק כשהדפדפן מאשר שהאתר מוכן ל-PWA
+            btn.style.display = 'block';
         });
 
         btn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    btn.style.display = 'none';
-                }
                 deferredPrompt = null;
             }
         });
 
-        // בדיקה אם כבר מותקן
+        // הצגת תוכן שונה לאפליקציה
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            console.log("Running as PWA");
+            document.querySelector('.app-only').style.display = 'block';
+            document.querySelector('.web-only').style.display = 'none';
         }
     </script>
 </body>
